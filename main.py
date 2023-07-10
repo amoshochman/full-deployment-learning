@@ -1,3 +1,6 @@
+import configparser
+import os
+
 from flask import Flask, render_template, request
 import redis
 
@@ -19,9 +22,15 @@ def process():
 
 
 if __name__ == '__main__':
-    pool = redis.ConnectionPool(host='redis', port=6379, db=0)
+    config_file = 'config.ini'
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    host = os.environ.get('REDIS_HOST') or config.get('Redis', 'host')
+
+    pool = redis.ConnectionPool(host=host, port=6379, db=0)
     redis = redis.Redis(connection_pool=pool)
     redis.set('mykey', 'Hello from Python!')
     value = redis.get('mykey')
 
     app.run(debug=True, host="0.0.0.0")
+
